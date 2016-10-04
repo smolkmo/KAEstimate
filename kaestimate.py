@@ -53,6 +53,18 @@ def getBestScoreDistribution(m,n,alphabet,getAlignmentScoreFn,threads=1,maxtime=
 def getLocalAlignmentScore(a,b,match,mismatch,gap_open,gap_extend):
     return pairwise2.align.localms(a,b,match,mismatch,gap_open,gap_extend,score_only=True)
 
+def getLocalUngappedAlignmentScore(a,b,match,mismatch):
+	score=0
+	maxscore=0
+	for i in range(len(a)):
+		if a[i]==b[i]:
+			score+=match
+		else:
+			score+=mismatch
+		score=max(0,score)
+		maxscore=max(maxscore,score)
+	return maxscore
+
 def p(distr,observed_score):
     sum_iters=0
     for score in distr:

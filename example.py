@@ -32,7 +32,11 @@ maxtime=60*10 #60*60*13
 #END PARAMETERS
 ####################################
 
+#Gapped
 distr=getBestScoreDistribution(m,n,alph,lambda a,b: getLocalAlignmentScore(a,b,match,mismatch,gapopen,gapextend),threads,maxtime)
+
+#Use this instead for ungapped
+#distr=getBestScoreDistribution(m,n,alph,lambda a,b: getLocalUngappedAlignmentScore(a,b,match,mismatch),threads,maxtime)
 
 report=open("report.txt","w")
 report.write("Karlin-Altschul Parameter Estimation Report\n")
