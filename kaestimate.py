@@ -113,3 +113,17 @@ def getFitDist(distr,l,K,m,n,maxp=1.0):
             considered+=1
             dist+=(p_act-p_ka)**2
     return dist/float(considered)
+
+def getLogLikelihood(distr,l,K,m,n):
+    ll=0
+
+    for i in distr:
+        a=getKAPValue(i,m,n,K,l)
+        b=getKAPValue(i+1,m,n,K,l)
+        p_ka=a-b
+        if a==b:
+            print("A=B for l=%f, K=%f, p=%f, i=%d, m=%d, n=%d"%(l,K,p_ka,i,m,n))
+            continue
+        print("l=%f, K=%f, p=%f, i=%d, m=%d, n=%d"%(l,K,p_ka,i,m,n))
+        ll+=log(p_ka)*distr[i]
+    return ll

@@ -18,15 +18,15 @@ n=100
 alph="ACGT"
 
 #Scoring scheme
-match=10
-mismatch=-15
-gapopen=-20
-gapextend=-20
+match=1
+mismatch=-1
+gapopen=-1
+gapextend=-1
 
 
 #Computational effort
-threads=4
-maxtime=60*10 #60*60*13
+threads=48
+maxtime=60*60*3 #60*60*13
 
 ####################################
 #END PARAMETERS
@@ -34,6 +34,11 @@ maxtime=60*10 #60*60*13
 
 #Gapped
 distr=getBestScoreDistribution(m,n,alph,lambda a,b: getLocalAlignmentScore(a,b,match,mismatch,gapopen,gapextend),threads,maxtime)
+
+import json
+distr_rep = open("distr.json","w")
+distr_rep.write(json.dumps(distr))
+distr_rep.close()
 
 #Use this instead for ungapped
 #distr=getBestScoreDistribution(m,n,alph,lambda a,b: getLocalUngappedAlignmentScore(a,b,match,mismatch),threads,maxtime)
@@ -43,6 +48,7 @@ report.write("Karlin-Altschul Parameter Estimation Report\n")
 report.write("===========================================\n")
 report.write("Run stats:\n")
 report.write("\tm=%d (database); n=%d (query); alph=%s\n"%(m,n,alph))
+report.write("\tsamples=%d"%(sum([distr[i] for i in distr])))
 report.write("\tmatch=%d; mismatch=%d; gapopen=%d; gapextend=%d\n"%(match,mismatch,gapopen,gapextend))
 report.write("\titers=%d; threads=%d; maxtime=%d; wallclock=%d\n"%(iters(distr),threads,maxtime,time.time()-start))
 report.write("===========================================\n")
@@ -105,6 +111,15 @@ writeBestFit(0.75)
 writeBestFit(0.5)
 writeBestFit(0.25)
 writeBestFit(0.05)
+
+report.write("\nMaximum Likelihood Estimate:\n")
+
+def getLogLikelihoodWrapper(x):
+    return -getLogLikelihood(distr,x[0],x[1],m,n)
+
+x0=np.array([1.0,1.0])
+res=minimize(getLogLikelihoodWrapper,x0,method="nelder-mead",bounds=np.array([(0.01,5),(0.01,10)]),options={"disp":True,"xtol":1e-20,"maxiter":1000000})
+report.write("\tMLE: lambda=%.10f, Kappa=%.10f (Fit avg. dist: %.10f)\n"%(res.x[0],res.x[1],getFitDist(distr,res.x[0],res.x[1],m,n,1.0)))
 
 report.flush()
 report.close()
